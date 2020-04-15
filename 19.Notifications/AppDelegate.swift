@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,7 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        requestAutorisation()
+        requestAutorization()
+        notificationCenter.delegate = self
         return true
     }
 
@@ -30,12 +32,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
+        UIApplication.shared.applicationIconBadgeNumber = 0
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
     }
 
-    func requestAutorisation() {
+    func requestAutorization() {
         notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
             print("Permission granted: \(granted)")
             
@@ -49,7 +52,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("Notification Settings: \(settings)")
         }
     }
+    
+        func scheduleNotification(notifaicationType: String) {
+            
+            let content = UNMutableNotificationContent()
+            
+            content.title = notifaicationType
+            content.body = "This is example how to create " + notifaicationType
+            content.sound = UNNotificationSound.default
+            content.badge = 1
+            
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+            
+            let identifire = "Local Notification"
+            let request = UNNotificationRequest(identifier: identifire,
+                                                content: content,
+                                                trigger: trigger)
+            
+            notificationCenter.add(request) { (error) in
+                if let error = error {
+                    print("Error \(error.localizedDescription)")
+                }
+            }
+        }
 
+    }
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert, .sound])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.notification.request.identifier == "Local Notification" {
+            print("Handling notofication with the Local Notification Identifire")
+        }
+        completionHandler()
+    }
 }
 
 
