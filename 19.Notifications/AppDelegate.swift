@@ -37,6 +37,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
     }
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        
+        let tokenParts = deviceToken.map { data -> String in
+            return String(format:"%02.2hhx", data)
+        }
+        
+        let token = tokenParts.joined()
+        print("Device token: \(token)")
     }
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register \(error)")
+    }
+}
 
 
